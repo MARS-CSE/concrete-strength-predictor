@@ -23,8 +23,19 @@ age = st.number_input("Age (days)", min_value=1.0, value=28.0)
 
 if st.button("Predict Strength"):
     features = np.array([[cement, slag, flyash, water, superplasticizer,
-                          coarse_aggregate, fine_aggregate, age]], dtype=float)
-    pred = model.predict(features)[0]
-    st.success(f"✅ Predicted Compressive Strength: **{pred:.2f} MPa**")
+                          coarse_aggregate, fine_aggregate, age]])
 
-st.caption("Model: Multiple Linear Regression (trained on the Concrete dataset)")
+    pred = model.predict(features)[0]
+
+    # Strength classification
+    if pred < 15:
+        category = "Very Weak"
+    elif pred < 30:
+        category = "Weak"
+    elif pred < 45:
+        category = "Moderate"
+    else:
+        category = "Strong"
+
+    st.success(f"Predicted Compressive Strength: {pred:.2f} MPa")
+    st.info(f"Strength Category: **{category}**")
