@@ -1,15 +1,30 @@
-
 import streamlit as st
 import joblib
 import numpy as np
 
+# Page configuration
 st.set_page_config(page_title="Concrete Strength Predictor", page_icon="🧱")
 
+# Title
 st.title("🧱 Concrete Compressive Strength Predictor")
-st.write("Enter the concrete mix details to predict compressive strength (MPa).")
+
+st.write(
+    "Enter the concrete mix components below to predict the compressive strength "
+    "of concrete using a Linear Regression model."
+)
+
+# Strength category table
+st.subheader("Concrete Strength Categories")
+
+st.table({
+    "Strength Range (MPa)": ["< 15", "15 – 30", "30 – 45", "> 45"],
+    "Category": ["Very Weak", "Weak", "Moderate", "Strong"]
+})
 
 # Load trained model
 model = joblib.load("linear_regression_concrete.pkl")
+
+st.subheader("Enter Concrete Mix Values")
 
 # Input fields
 cement = st.number_input("Cement (kg/m³)", min_value=0.0, value=281.17)
@@ -21,21 +36,32 @@ coarse_aggregate = st.number_input("Coarse Aggregate (kg/m³)", min_value=0.0, v
 fine_aggregate = st.number_input("Fine Aggregate (kg/m³)", min_value=0.0, value=773.58)
 age = st.number_input("Age (days)", min_value=1.0, value=28.0)
 
+# Prediction button
 if st.button("Predict Strength"):
-    features = np.array([[cement, slag, flyash, water, superplasticizer,
-                          coarse_aggregate, fine_aggregate, age]])
 
-    pred = model.predict(features)[0]
+    features = np.array([[cement, slag, flyash, water,
+                          superplasticizer, coarse_aggregate,
+                          fine_aggregate, age]])
+
+    prediction = model.predict(features)[0]
 
     # Strength classification
-    if pred < 15:
+    if prediction < 15:
         category = "Very Weak"
-    elif pred < 30:
+        st.error(f"Predicted Strength: {prediction:.2f} MPa | Category: {category}")
+
+    elif prediction < 30:
         category = "Weak"
-    elif pred < 45:
+        st.warning(f"Predicted Strength: {prediction:.2f} MPa | Category: {category}")
+
+    elif prediction < 45:
         category = "Moderate"
+        st.info(f"Predicted Strength: {prediction:.2f} MPa | Category: {category}")
+
     else:
         category = "Strong"
+        st.success(f"Predicted Strength: {prediction:.2f} MPa | Category: {category}")
 
-    st.success(f"Predicted Compressive Strength: {pred:.2f} MPa")
-    st.info(f"Strength Category: **{category}**")
+# Footer
+st.markdown("---")
+st.caption("Model: Multiple Linear Regression trained on the Concrete Compressive Strength Dataset")
